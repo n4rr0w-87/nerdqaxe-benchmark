@@ -1,0 +1,264 @@
+{
+    "all_results": [
+        {
+            "coreVoltage": 1150,
+            "frequency": 600,
+            "averageHashRate": 4156.356405405406,
+            "averageTemperature": 49.657939189189186,
+            "efficiencyJTH": 18.364191506949233,
+            "averageVRTemp": 53.657939189189186
+        },
+        {
+            "coreVoltage": 1160,
+            "frequency": 580,
+            "averageHashRate": 4036.122662162162,
+            "averageTemperature": 49.536317567567565,
+            "efficiencyJTH": 18.678585565983237,
+            "averageVRTemp": 52.95945945945946
+        },
+        {
+            "coreVoltage": 1170,
+            "frequency": 560,
+            "averageHashRate": 4145.621702702702,
+            "averageTemperature": 49.02111486486486,
+            "efficiencyJTH": 18.081199365376705,
+            "averageVRTemp": 51.75591216216216
+        },
+        {
+            "coreVoltage": 1170,
+            "frequency": 580,
+            "averageHashRate": 4266.734770270271,
+            "averageTemperature": 49.54307432432432,
+            "efficiencyJTH": 17.98872653974181,
+            "averageVRTemp": 53.20945945945946
+        },
+        {
+            "coreVoltage": 1170,
+            "frequency": 600,
+            "averageHashRate": 4623.345797297297,
+            "averageTemperature": 50.15287162162162,
+            "efficiencyJTH": 17.04934120352393,
+            "averageVRTemp": 54.77449324324324
+        },
+        {
+            "coreVoltage": 1170,
+            "frequency": 620,
+            "averageHashRate": 4733.557148648649,
+            "averageTemperature": 50.83192567567568,
+            "efficiencyJTH": 17.14487592553282,
+            "averageVRTemp": 56.4535472972973
+        },
+        {
+            "coreVoltage": 1170,
+            "frequency": 640,
+            "averageHashRate": 5032.022878378378,
+            "averageTemperature": 51.47128378378378,
+            "efficiencyJTH": 16.509265161920688,
+            "averageVRTemp": 58.101351351351354
+        },
+        {
+            "coreVoltage": 1170,
+            "frequency": 660,
+            "averageHashRate": 4736.90172972973,
+            "averageTemperature": 51.94087837837838,
+            "efficiencyJTH": 18.03690837911363,
+            "averageVRTemp": 59.664695945945944
+        },
+        {
+            "coreVoltage": 1180,
+            "frequency": 640,
+            "averageHashRate": 4694.997270270271,
+            "averageTemperature": 51.992398648648646,
+            "efficiencyJTH": 18.049464700779634,
+            "averageVRTemp": 59.054898648648646
+        },
+        {
+            "coreVoltage": 1190,
+            "frequency": 620,
+            "averageHashRate": 5181.705797297297,
+            "averageTemperature": 51.72128378378378,
+            "efficiencyJTH": 16.2147979423733,
+            "averageVRTemp": 58.09966216216216
+        },
+        {
+            "coreVoltage": 1190,
+            "frequency": 640,
+            "averageHashRate": 4860.827972972973,
+            "averageTemperature": 52.59628378378378,
+            "efficiencyJTH": 17.857040093297417,
+            "averageVRTemp": 60.1554054054054
+        },
+        {
+            "coreVoltage": 1190,
+            "frequency": 660,
+            "averageHashRate": 5018.132635135135,
+            "averageTemperature": 53.125,
+            "efficiencyJTH": 17.729765027943326,
+            "averageVRTemp": 61.92483108108108
+        },
+        {
+            "coreVoltage": 1190,
+            "frequency": 680,
+            "averageHashRate": 5578.998054054055,
+            "averageTemperature": 53.695945945945944,
+            "efficiencyJTH": 16.314813451827405,
+            "averageVRTemp": 63.74746621621622
+        },
+        {
+            "coreVoltage": 1190,
+            "frequency": 700,
+            "averageHashRate": 5743.023027027028,
+            "averageTemperature": 54.75675675675676,
+            "efficiencyJTH": 16.42427682356498,
+            "averageVRTemp": 66.79138513513513
+        }
+    ],
+    "top_performers": [
+        {
+            "rank": 1,
+            "coreVoltage": 1190,
+            "frequency": 700,
+            "averageHashRate": 5743.023027027028,
+            "averageTemperature": 54.75675675675676,
+            "efficiencyJTH": 16.42427682356498,
+            "averageVRTemp": 66.79138513513513
+        },
+        {
+            "rank": 2,
+            "coreVoltage": 1190,
+            "frequency": 680,
+            "averageHashRate": 5578.998054054055,
+            "averageTemperature": 53.695945945945944,
+            "efficiencyJTH": 16.314813451827405,
+            "averageVRTemp": 63.74746621621622
+        },
+        {
+            "rank": 3,
+            "coreVoltage": 1190,
+            "frequency": 620,
+            "averageHashRate": 5181.705797297297,
+            "averageTemperature": 51.72128378378378,
+            "efficiencyJTH": 16.2147979423733,
+            "averageVRTemp": 58.09966216216216
+        },
+        {
+            "rank": 4,
+            "coreVoltage": 1170,
+            "frequency": 640,
+            "averageHashRate": 5032.022878378378,
+            "averageTemperature": 51.47128378378378,
+            "efficiencyJTH": 16.509265161920688,
+            "averageVRTemp": 58.101351351351354
+        },
+        {
+            "rank": 5,
+            "coreVoltage": 1190,
+            "frequency": 660,
+            "averageHashRate": 5018.132635135135,
+            "averageTemperature": 53.125,
+            "efficiencyJTH": 17.729765027943326,
+            "averageVRTemp": 61.92483108108108
+        },
+        {
+            "rank": 6,
+            "coreVoltage": 1190,
+            "frequency": 640,
+            "averageHashRate": 4860.827972972973,
+            "averageTemperature": 52.59628378378378,
+            "efficiencyJTH": 17.857040093297417,
+            "averageVRTemp": 60.1554054054054
+        },
+        {
+            "rank": 7,
+            "coreVoltage": 1170,
+            "frequency": 660,
+            "averageHashRate": 4736.90172972973,
+            "averageTemperature": 51.94087837837838,
+            "efficiencyJTH": 18.03690837911363,
+            "averageVRTemp": 59.664695945945944
+        },
+        {
+            "rank": 8,
+            "coreVoltage": 1170,
+            "frequency": 620,
+            "averageHashRate": 4733.557148648649,
+            "averageTemperature": 50.83192567567568,
+            "efficiencyJTH": 17.14487592553282,
+            "averageVRTemp": 56.4535472972973
+        }
+    ],
+    "most_efficient": [
+        {
+            "rank": 1,
+            "coreVoltage": 1190,
+            "frequency": 620,
+            "averageHashRate": 5181.705797297297,
+            "averageTemperature": 51.72128378378378,
+            "efficiencyJTH": 16.2147979423733,
+            "averageVRTemp": 58.09966216216216
+        },
+        {
+            "rank": 2,
+            "coreVoltage": 1190,
+            "frequency": 680,
+            "averageHashRate": 5578.998054054055,
+            "averageTemperature": 53.695945945945944,
+            "efficiencyJTH": 16.314813451827405,
+            "averageVRTemp": 63.74746621621622
+        },
+        {
+            "rank": 3,
+            "coreVoltage": 1190,
+            "frequency": 700,
+            "averageHashRate": 5743.023027027028,
+            "averageTemperature": 54.75675675675676,
+            "efficiencyJTH": 16.42427682356498,
+            "averageVRTemp": 66.79138513513513
+        },
+        {
+            "rank": 4,
+            "coreVoltage": 1170,
+            "frequency": 640,
+            "averageHashRate": 5032.022878378378,
+            "averageTemperature": 51.47128378378378,
+            "efficiencyJTH": 16.509265161920688,
+            "averageVRTemp": 58.101351351351354
+        },
+        {
+            "rank": 5,
+            "coreVoltage": 1170,
+            "frequency": 600,
+            "averageHashRate": 4623.345797297297,
+            "averageTemperature": 50.15287162162162,
+            "efficiencyJTH": 17.04934120352393,
+            "averageVRTemp": 54.77449324324324
+        },
+        {
+            "rank": 6,
+            "coreVoltage": 1170,
+            "frequency": 620,
+            "averageHashRate": 4733.557148648649,
+            "averageTemperature": 50.83192567567568,
+            "efficiencyJTH": 17.14487592553282,
+            "averageVRTemp": 56.4535472972973
+        },
+        {
+            "rank": 7,
+            "coreVoltage": 1190,
+            "frequency": 660,
+            "averageHashRate": 5018.132635135135,
+            "averageTemperature": 53.125,
+            "efficiencyJTH": 17.729765027943326,
+            "averageVRTemp": 61.92483108108108
+        },
+        {
+            "rank": 8,
+            "coreVoltage": 1190,
+            "frequency": 640,
+            "averageHashRate": 4860.827972972973,
+            "averageTemperature": 52.59628378378378,
+            "efficiencyJTH": 17.857040093297417,
+            "averageVRTemp": 60.1554054054054
+        }
+    ]
+}%
