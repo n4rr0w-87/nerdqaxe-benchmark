@@ -1,144 +1,155 @@
 # Nerdqaxe++ Hashrate Benchmark Tool
 
-A Python-based benchmarking tool for optimizing Nerdqaxe++ mining performance by testing different voltage and frequency combinations while monitoring hashrate, temperature, and power efficiency.
+Ein Python-basiertes Benchmarking-Tool zur Optimierung der Mining-Leistung von Nerdqaxe++, das verschiedene Kombinationen von Spannung und Frequenz testet und dabei Hashrate, Temperatur und Energieeffizienz überwacht.
 
 ---
 
-## ⚠️ Disclaimer
-Please use this tool responsibly. Overclocking and voltage modifications can potentially damage your hardware if not done carefully. Always ensure proper cooling and monitor your device during benchmarking.
+## ⚠️ Haftungsausschluss
+
+Bitte verwende dieses Tool verantwortungsvoll. Übertaktung und Spannungsänderungen können deine Hardware beschädigen, wenn sie unsachgemäß durchgeführt werden. Sorge stets für ausreichende Kühlung und überwache dein Gerät während des Benchmarkings.
 
 ---
 
-## 🚀 Features
-- Automated benchmarking of different voltage/frequency combinations
-- Fine-tuning mode (`--fine`) to re-test top 8 combinations in more detail
-- Resume mode (`--resume`) to continue from saved progress
-- Temperature and VRM monitoring with safety cutoffs
-- Power efficiency calculations (J/TH)
-- Input voltage and power draw protection
-- Graceful shutdown and automatic restoration of best settings
-- JSON result storage
+## 🚀 Funktionen
+
+- Automatisiertes Benchmarking verschiedener Spannungs-/Frequenzkombinationen
+- Feintuning-Modus (`--fine`), um die 8 besten Kombinationen detaillierter zu testen
+- Fortsetzungsmodus (`--resume`), um einen unterbrochenen Benchmark fortzusetzen
+- Temperatur- und VRM-Überwachung mit Sicherheitsabschaltung
+- Berechnung der Energieeffizienz (Joule/TH)
+- Schutz vor zu hoher Leistungsaufnahme und Eingangsspannung
+- Sauberer Abbruch und automatische Wiederherstellung der besten Einstellungen
+- Speicherung der Ergebnisse im JSON-Format
 
 ---
 
-## 📋 Prerequisites
-- Python 3.11 or higher
-- Access to a Nerdqaxe++ miner on your local network
-- Git (optional)
+## 📋 Voraussetzungen
+
+- Python 3.11 oder neuer
+- Zugang zu einem Nerdqaxe++ Miner im lokalen Netzwerk
+- Git (optional, für die Installation)
 
 ---
 
 ## 🧪 Installation
 
-### 📦 Standard Installation
+### 📦 Standard-Installation
+
 ```bash
 git clone https://github.com/n4rr0w-87/nerdqaxe-benchmark.git
 cd nerdqaxe-benchmark
 python -m venv venv
-source venv/bin/activate  # or venv\Scripts\activate on Windows
+source venv/bin/activate  # unter Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
 ---
 
-## ▶️ Usage
+## ▶️ Nutzung
 
-### Standard Benchmark
+### Standard-Benchmark
 ```bash
 python nerdqaxe_benchmark.py <NERDQAXE_IP>
 ```
 
-### Resume Previous Benchmark
+### Benchmark fortsetzen
 ```bash
 python nerdqaxe_benchmark.py <NERDQAXE_IP> --resume
 ```
 
-### Fine-tune Top Results
+### Feintuning der besten Ergebnisse
 ```bash
 python nerdqaxe_benchmark.py  <NERDQAXE_IP> --fine
 ```
-> `--resume` is automatically enabled with `--fine`
+> `--resume` is wird automatisch mit `--fine`
 
-### With Initial Settings
+### Mit benutzerdefinierten Startwerten
 ```bash
 python nerdqaxe_benchmark.py  192.168.2.26 -v 1175 -f 775
 ```
 
 ---
 
-## ⚙️ Configuration
-| Parameter                   | Value           |
-|----------------------------|-----------------|
-| Max chip temp              | 66 °C           |
-| Max VR temp                | 86 °C           |
-| Max power draw             | 40 W            |
-| Min voltage                | 1000 mV         |
-| Max voltage                | 1400 mV         |
-| Min frequency              | 400 MHz         |
-| Max frequency              | 1200 MHz        |
-| Input voltage min          | 4800 mV         |
-| Input voltage max          | 5500 mV         |
-| Benchmark duration         | 10 min/test     |
-| Sampling interval          | 15 sec          |
-| Voltage increment          | 20 mV           |
-| Frequency increment        | 25 MHz          |
-| Min valid samples per run  | 7               |
+## ⚙️ Konfiguration
+
+| Parameter                     | Wert           |
+|------------------------------|----------------|
+| Maximale Chip-Temperatur     | 66 °C          |
+| Maximale VRM-Temperatur      | 86 °C          |
+| Maximale Leistungsaufnahme   | 40 W           |
+| Minimale Spannung            | 1000 mV        |
+| Maximale Spannung            | 1400 mV        |
+| Minimale Frequenz            | 400 MHz        |
+| Maximale Frequenz            | 1200 MHz       |
+| Minimale Eingangsspannung    | 4800 mV        |
+| Maximale Eingangsspannung    | 5500 mV        |
+| Benchmark-Dauer pro Test     | 10 Minuten     |
+| Messintervall                | 15 Sekunden    |
+| Spannungs-Inkrement          | 20 mV          |
+| Frequenz-Inkrement           | 25 MHz         |
+| Mindestanzahl gültiger Werte | 7              |
 
 ---
 
-## 💾 Output
+## 💾 Ausgabe
+
 - `nerdqaxe_benchmark_results_<ip>.json`
-  - All combinations tested
-  - Top 8 performers (by hashrate)
-  - Top 8 efficient settings (J/TH)
+  - Alle getesteten Kombinationen
+  - Top 8 Kombinationen (nach Hashrate)
+  - Top 8 Kombinationen (nach Effizienz, J/TH)
 
-Each result includes:
-- Average hashrate (with outlier filtering)
-- Average chip & VRM temperature
-- Power draw & efficiency
-- Input voltage
-
----
-
-## 🛡️ Safety Features
-- Max temp cutoff: 66–68 °C
-- VRM temp cutoff: 85–86 °C
-- Input voltage limits (11.6–12.0 V)
-- Power limit: 100 W
-- Rejects unstable or invalid data
-- Hashrate validation (±10%)
-- Graceful shutdown (Ctrl+C)
-- Auto-reset to best settings
+Jedes Ergebnis enthält:
+- Durchschnittliche Hashrate (mit Ausreißerfilterung)
+- Durchschnittliche Chip- & VRM-Temperatur
+- Leistungsaufnahme & Effizienz
+- Eingangsspannung
 
 ---
 
-## 🔄 Benchmarking Process
-1. Start with default or given voltage/frequency
-2. Run each config for 10 min
-3. Measure temp, power, hashrate
-4. Validate & store result
-5. Proceed with next config
-6. After all tests, apply best result
+## 🛡️ Sicherheitsfunktionen
 
-In `--fine` mode:
-- Take Top 8 hashrate configs
-- Fine-tune with ±5 mV / ±10 MHz
-- Store new top result and apply
+- Temperaturabschaltung bei 66–68 °C
+- VRM-Abschaltung bei 85–86 °C
+- Eingangs­spannungsgrenzen: 11,6–12,0 V
+- Leistungsgrenze: 100 W
+- Ungültige oder instabile Daten werden verworfen
+- Hashrate-Validierung (±10 %)
+- Sicherer Abbruch mit `Ctrl+C`
+- Automatische Wiederherstellung der besten Einstellungen
 
 ---
 
-## 🧠 Data Processing
-- First 6 temp readings ignored (warmup)
-- 3 lowest & 3 highest hashrate samples dropped
-- Efficiency = Avg Power / Avg Hashrate (J/TH)
-- Rejects results with invalid or unstable readings
+## 🔄 Benchmark-Ablauf
+
+1. Start mit Standard- oder benutzerdefinierten Werten (Spannung/Frequenz)
+2. Führe jede Konfiguration für 10 Minuten aus
+3. Messe Temperatur, Leistung und Hashrate
+4. Validiere und speichere das Ergebnis
+5. Fahre mit der nächsten Konfiguration fort
+6. Nach Abschluss wird die beste Konfiguration angewendet
+
+Im `--fine`-Modus:
+- Auswahl der 8 besten Konfigurationen (nach Hashrate)
+- Feintuning mit ±5 mV / ±10 MHz
+- Speichere und aktiviere das neue beste Ergebnis
 
 ---
 
-## 🤝 Contributing
-Pull requests welcome! Feel free to fork the repo and submit improvements.
+## 🧠 Datenverarbeitung
+
+- Die ersten 6 Temperaturmesswerte werden ignoriert (Aufwärmphase)
+- Jeweils 3 niedrigste & 3 höchste Hashrate-Werte werden verworfen
+- Effizienz = Durchschnittsleistung / Durchschnitts-Hashrate (J/TH)
+- Ungültige oder instabile Ergebnisse werden verworfen
 
 ---
 
-## 📄 License
-GPLv3 – See `LICENSE` file for details.
+## 🤝 Mitwirken
+
+Pull Requests sind willkommen! Forke das Repository und reiche deine Verbesserungen ein.
+
+---
+
+## 📄 Lizenz
+
+GPLv3 – Siehe die Datei `LICENSE` für Details.
