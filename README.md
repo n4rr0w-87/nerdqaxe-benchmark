@@ -32,7 +32,7 @@ Please use this tool responsibly. Overclocking and voltage modifications can pot
 
 ### 📦 Standard Installation
 ```bash
-git clone [https://github.com/<your-username>/nerdqaxe-benchmark.git](https://github.com/n4rr0w-87/nerdqaxe-benchmark.git)
+git clone https://github.com/n4rr0w-87/nerdqaxe-benchmark.git
 cd nerdqaxe-benchmark
 python -m venv venv
 source venv/bin/activate  # or venv\Scripts\activate on Windows
