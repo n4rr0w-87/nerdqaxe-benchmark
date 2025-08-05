@@ -61,7 +61,7 @@ python nerdqaxe_benchmark.py <NERDQAXE_IP> --resume
 ```bash
 python nerdqaxe_benchmark.py  <NERDQAXE_IP> --fine
 ```
-> `--resume` is wird automatisch mit `--fine`
+> `--resume` wird automatisch mit `--fine`
 
 ### Mit benutzerdefinierten Startwerten
 ```bash
