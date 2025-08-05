@@ -1,0 +1,4 @@
+echo -e "venv/\n__pycache__/\n*.pyc\n*.pyo\n*.pyd\n*.log\n*.json" > .gitignore
+git add .gitignore
+git commit -m "Add .gitignore"
+git push
