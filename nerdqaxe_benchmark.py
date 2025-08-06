@@ -21,9 +21,9 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description='Bitaxe Hashrate Benchmark Tool')
     parser.add_argument('nerdqaxe_ip', nargs='?', help='IP address of the Bitaxe (e.g., 192.168.2.26)')
     parser.add_argument('-v', '--voltage', type=int, default=1150,
-                       help='Initial voltage in mV (default: 1150)')
+                        help='Initial voltage in mV (default: 1150)')
     parser.add_argument('-f', '--frequency', type=int, default=600,
-                       help='Initial frequency in MHz (default: 600)')
+                        help='Initial frequency in MHz (default: 600)')
     parser.add_argument('--resume', action='store_true', help='Resume from previous benchmark results')
     parser.add_argument('--fine', action='store_true', help='Use fine-grained frequency stepping')
 
@@ -33,17 +33,39 @@ def parse_arguments():
 
     return parser.parse_args()
 
-
 # =============================================================
-#                           SETUP
+#                              SETUP
 # =============================================================
 args = parse_arguments()
 
+# Setup file names for results and backups
+from datetime import datetime
+ip_address = args.nerdqaxe_ip
+resume_filename = f"nerdqaxe_benchmark_results_{ip_address}.json"
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+backup_filename = f"{resume_filename}.{timestamp}.bak"
+
+# Create backup if existing results file is found
+if os.path.exists(resume_filename):
+    try:
+        import shutil
+        shutil.copy2(resume_filename, backup_filename)
+        print(GREEN + f"Backup created: {backup_filename}" + RESET)
+    except Exception as e:
+        print(RED + f"Failed to create backup file: {e}" + RESET)
+
+# Automatically activate resume if file exists
+if not args.resume and os.path.exists(resume_filename):
+    print(YELLOW + f"Found existing results for {ip_address}, automatically resuming..." + RESET)
+    args.resume = True
+
+# Fine tuning requires resume mode
 if args.fine and not args.resume:
     print(YELLOW + "--fine mode requires previous results. Automatically enabling --resume." + RESET)
     args.resume = True
 
-nerdqaxe_ip = f"http://{args.nerdqaxe_ip}"
+# Define target device and initial parameters
+nerdqaxe_ip = f"http://{ip_address}"
 initial_voltage = args.voltage
 initial_frequency = args.frequency
 
