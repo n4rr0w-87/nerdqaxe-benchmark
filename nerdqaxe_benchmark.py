@@ -134,7 +134,7 @@ if args.resume and os.path.exists(resume_filename):
 def fetch_default_settings():
     global default_voltage, default_frequency, small_core_count, asic_count
     try:
-        response = requests.get(f"{nerdqaxe_ip}/api/system/info", timeout=10)
+        response = requests.get(f"{nerdqaxe_ip}/api/system/info", timeout=20)
         response.raise_for_status()
         system_info = response.json()
         default_voltage = system_info.get("coreVoltage", 1150)  # Fallback to 1150 if not found
@@ -231,7 +231,7 @@ def get_system_info():
     retries = 3
     for attempt in range(retries):
         try:
-            response = requests.get(f"{nerdqaxe_ip}/api/system/info", timeout=10)
+            response = requests.get(f"{nerdqaxe_ip}/api/system/info", timeout=20)
             response.raise_for_status()  # Raise an exception for HTTP errors
             return response.json()
         except requests.exceptions.Timeout:
@@ -252,7 +252,7 @@ def set_system_settings(core_voltage, frequency):
         "frequency": frequency
     }
     try:
-        response = requests.patch(f"{nerdqaxe_ip}/api/system", json=settings, timeout=10)
+        response = requests.patch(f"{nerdqaxe_ip}/api/system", json=settings, timeout=20)
         response.raise_for_status()  # Raise an exception for HTTP errors
         print(YELLOW + f"Applying settings: Voltage = {core_voltage}mV, Frequency = {frequency}MHz" + RESET)
         time.sleep(2)
@@ -266,12 +266,12 @@ def restart_system():
 
         if not is_interrupt:
             print(YELLOW + "Applying new settings and waiting 600s for system stabilization..." + RESET)
-            response = requests.post(f"{nerdqaxe_ip}/api/system/restart", timeout=10)
+            response = requests.post(f"{nerdqaxe_ip}/api/system/restart", timeout=20)
             response.raise_for_status()  # Raise an exception for HTTP errors
             time.sleep(600)  # Allow 600s, time for the system to restart and start hashing
         else:
             print(YELLOW + "Applying final settings..." + RESET)
-            response = requests.post(f"{nerdqaxe_ip}/api/system/restart", timeout=10)
+            response = requests.post(f"{nerdqaxe_ip}/api/system/restart", timeout=20)
             response.raise_for_status()  # Raise an exception for HTTP errors
     except requests.exceptions.RequestException as e:
         print(RED + f"Error restarting the system: {e}" + RESET)
@@ -530,12 +530,16 @@ finally:
             set_system_settings(default_voltage, default_frequency)
             restart_system()
         system_reset_done = True
+        results = sorted(results, key=lambda x: (x["coreVoltage"], x["frequency"]))
 
     # Print results summary only if we have results
     if results:
-        # Sort results by averageHashRate in descending order and get the top 8
+        # Sort all results by coreVoltage, then frequency
+        results = sorted(results, key=lambda x: (x["coreVoltage"], x["frequency"]))
+
+        # Determine top 8 performers and most efficient settings
         top_8_results = sorted(results, key=lambda x: x["averageHashRate"], reverse=True)[:8]
-        top_8_efficient_results = sorted(results, key=lambda x: x["efficiencyJTH"], reverse=False)[:8]
+        top_8_efficient_results = sorted(results, key=lambda x: x["efficiencyJTH"], reverse=True)[:8]
 
         # Create a dictionary containing all results and top performers
         final_data = {
@@ -585,7 +589,7 @@ finally:
                 if "averageVRTemp" in result:
                     print(GREEN + f"  Average VR Temperature: {result['averageVRTemp']:.2f}°C" + RESET)
 
-            print(GREEN + "\nTop 5 Most Efficient Settings:" + RESET)
+            print(GREEN + "\nTop 8 Most Efficient Settings:" + RESET)
             for i, result in enumerate(top_8_efficient_results, 1):
                 print(GREEN + f"\nRank {i}:" + RESET)
                 print(GREEN + f"  Core Voltage: {result['coreVoltage']}mV" + RESET)
