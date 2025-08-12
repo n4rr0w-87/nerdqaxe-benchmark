@@ -72,8 +72,11 @@ initial_frequency = args.frequency
 # =============================================================
 #                    BENCHMARK CONFIGURATION
 # =============================================================
-voltage_increment = 10
-frequency_increment = 10 if args.fine else 20
+# Step sizes used for building the full grid
+voltage_step = 10
+frequency_step = 10 if args.fine else 20
+
+# Benchmark timing and limits
 benchmark_time = 1200
 sample_interval = 15
 max_temp = 68
@@ -83,8 +86,12 @@ max_vr_temp = 85
 min_input_voltage = 11600
 max_input_voltage = 12000
 max_power = 100
+
+# Hardware info (filled from device)
 small_core_count = None
 asic_count = None
+
+# Hard bounds for grid
 min_allowed_voltage = 1120
 min_allowed_frequency = 500
 
@@ -117,10 +124,8 @@ if args.resume and os.path.exists(resume_filename):
     with open(resume_filename, "r") as f:
         try:
             resume_data = json.load(f)
-            if "all_results" in resume_data:
-                resume_results = resume_data["all_results"]
-            else:
-                resume_results = resume_data
+            # Support both legacy array and new dict format
+            resume_results = resume_data["all_results"] if isinstance(resume_data, dict) and "all_results" in resume_data else resume_data
             for entry in resume_results:
                 tested_combinations.add((entry["coreVoltage"], entry["frequency"]))
             print(GREEN + f"Resuming benchmark. Loaded {len(tested_combinations)} tested combinations." + RESET)
@@ -132,13 +137,14 @@ if args.resume and os.path.exists(resume_filename):
 #                    SYSTEM INTERACTION
 # =============================================================
 def fetch_default_settings():
+    """Query device for defaults and core configuration."""
     global default_voltage, default_frequency, small_core_count, asic_count
     try:
         response = requests.get(f"{nerdqaxe_ip}/api/system/info", timeout=20)
         response.raise_for_status()
         system_info = response.json()
         default_voltage = system_info.get("coreVoltage", 1150)  # Fallback to 1150 if not found
-        default_frequency = system_info.get("frequency", 600)  # Fallback to 600 if not found
+        default_frequency = system_info.get("frequency", 600)   # Fallback to 600 if not found
         small_core_count = system_info.get("smallCoreCount", 0)
         asic_count = system_info.get("asicCount", 0)
         print(GREEN + f"Current settings determined:\n"
@@ -153,10 +159,12 @@ def fetch_default_settings():
         asic_count = 0
 
 system_reset_done = False
+
 # =============================================================
 #             FINE-TUNE FUNCTION FOR TOP PERFORMERS
 # =============================================================
 def fine_tune_top_performers(top_results):
+    """Local 3x3 grid around each top performer."""
     print(GREEN + "\n[FINE] Starting fine-tuning phase on top performers..." + RESET)
     fine_voltage_step = 5
     fine_frequency_step = 10
@@ -200,10 +208,12 @@ def fine_tune_top_performers(top_results):
                     tested_combinations.add((new_voltage, new_frequency))
                 else:
                     print(YELLOW + f"[FINE] Skipping unstable result at {new_voltage}mV @ {new_frequency}MHz" + RESET)
+
 # =============================================================
 #                      SIGNAL HANDLING
 # =============================================================
 def handle_sigint(signum, frame):
+    """On Ctrl+C, apply best known settings and save."""
     global system_reset_done, handling_interrupt
 
     if handling_interrupt or system_reset_done:
@@ -228,11 +238,12 @@ def handle_sigint(signum, frame):
 signal.signal(signal.SIGINT, handle_sigint)
 
 def get_system_info():
+    """Fetch one snapshot of telemetry from device, with retries."""
     retries = 3
     for attempt in range(retries):
         try:
             response = requests.get(f"{nerdqaxe_ip}/api/system/info", timeout=20)
-            response.raise_for_status()  # Raise an exception for HTTP errors
+            response.raise_for_status()
             return response.json()
         except requests.exceptions.Timeout:
             print(YELLOW + f"Timeout while fetching system info. Attempt {attempt + 1} of {retries}." + RESET)
@@ -241,19 +252,21 @@ def get_system_info():
         except requests.exceptions.RequestException as e:
             print(RED + f"Error fetching system info: {e}" + RESET)
             break
-        time.sleep(5)  # Wait before retrying
+        time.sleep(5)
     return None
+
 # =============================================================
 #                  BENCHMARKING FUNCTION
 # =============================================================
 def set_system_settings(core_voltage, frequency):
+    """Send new V/F settings and reboot to apply."""
     settings = {
         "coreVoltage": core_voltage,
         "frequency": frequency
     }
     try:
         response = requests.patch(f"{nerdqaxe_ip}/api/system", json=settings, timeout=20)
-        response.raise_for_status()  # Raise an exception for HTTP errors
+        response.raise_for_status()
         print(YELLOW + f"Applying settings: Voltage = {core_voltage}mV, Frequency = {frequency}MHz" + RESET)
         time.sleep(2)
         restart_system()
@@ -261,22 +274,24 @@ def set_system_settings(core_voltage, frequency):
         print(RED + f"Error setting system settings: {e}" + RESET)
 
 def restart_system():
+    """Restart hashing to apply settings; wait for stabilization unless shutting down."""
     try:
         is_interrupt = handling_interrupt
 
         if not is_interrupt:
             print(YELLOW + "Applying new settings and waiting 600s for system stabilization..." + RESET)
             response = requests.post(f"{nerdqaxe_ip}/api/system/restart", timeout=20)
-            response.raise_for_status()  # Raise an exception for HTTP errors
-            time.sleep(600)  # Allow 600s, time for the system to restart and start hashing
+            response.raise_for_status()
+            time.sleep(600)  # Give time for restart and hashing to stabilize
         else:
             print(YELLOW + "Applying final settings..." + RESET)
             response = requests.post(f"{nerdqaxe_ip}/api/system/restart", timeout=20)
-            response.raise_for_status()  # Raise an exception for HTTP errors
+            response.raise_for_status()
     except requests.exceptions.RequestException as e:
         print(RED + f"Error restarting the system: {e}" + RESET)
 
 def benchmark_iteration(core_voltage, frequency):
+    """Run one benchmark window at given V/F, collect and reduce metrics."""
     current_time = time.strftime("%H:%M:%S")
     print(GREEN + f"[{current_time}] Starting benchmark for Core Voltage: {core_voltage}mV, Frequency: {frequency}MHz" + RESET)
     hash_rates = []
@@ -284,7 +299,7 @@ def benchmark_iteration(core_voltage, frequency):
     power_consumptions = []
     vr_temps = []
     total_samples = benchmark_time // sample_interval
-    expected_hashrate = frequency * ((small_core_count * asic_count) / 1000)  # Calculate expected hashrate based on frequency
+    expected_hashrate = frequency * ((small_core_count * asic_count) / 1000)  # simple heuristic
 
     for sample in range(total_samples):
         info = get_system_info()
@@ -293,8 +308,9 @@ def benchmark_iteration(core_voltage, frequency):
             return None, None, None, False, None, "SYSTEM_INFO_FAILURE"
 
         temp = info.get("temp")
-        vr_temp = info.get("vrTemp")  # Get VR temperature if available
+        vr_temp = info.get("vrTemp")
         voltage = info.get("voltage")
+
         if temp is None:
             print(YELLOW + "Temperature data not available." + RESET)
             return None, None, None, False, None, "TEMPERATURE_DATA_FAILURE"
@@ -303,7 +319,7 @@ def benchmark_iteration(core_voltage, frequency):
             print(YELLOW + "Temperature is below 5°C. This is unexpected. Please check the system." + RESET)
             return None, None, None, False, None, "TEMPERATURE_BELOW_5"
 
-        # Check both chip and VR temperatures
+        # Thermal/voltage/power guards
         if temp >= max_temp:
             print(RED + f"Chip temperature exceeded {max_temp}°C! Stopping current benchmark." + RESET)
             return None, None, None, False, None, "CHIP_TEMP_EXCEEDED"
@@ -337,7 +353,7 @@ def benchmark_iteration(core_voltage, frequency):
         if vr_temp is not None and vr_temp > 0:
             vr_temps.append(vr_temp)
 
-        # Calculate percentage progress
+        # Progress line
         percentage_progress = ((sample + 1) / total_samples) * 100
         status_line = (
             f"[{sample + 1:2d}/{total_samples:2d}] "
@@ -352,38 +368,35 @@ def benchmark_iteration(core_voltage, frequency):
             status_line += f" | VR: {int(vr_temp):2d}°C"
         print(status_line + RESET)
 
-        # Only sleep if it's not the last iteration
         if sample < total_samples - 1:
             time.sleep(sample_interval)
 
     if hash_rates and temperatures and power_consumptions:
-        # Remove 3 highest and 3 lowest hashrates in case of outliers
+        # Trim outliers from hashrate
         sorted_hashrates = sorted(hash_rates)
-        trimmed_hashrates = sorted_hashrates[3:-3]  # Remove first 3 and last 3 elements
+        trimmed_hashrates = sorted_hashrates[3:-3] if len(sorted_hashrates) > 6 else sorted_hashrates
         average_hashrate = sum(trimmed_hashrates) / len(trimmed_hashrates)
 
-        # Sort and trim temperatures (remove lowest 6 readings during warmup)
+        # Trim warmup from temps
         sorted_temps = sorted(temperatures)
-        trimmed_temps = sorted_temps[6:]  # Remove first 6 elements only
+        trimmed_temps = sorted_temps[6:] if len(sorted_temps) > 6 else sorted_temps
         average_temperature = sum(trimmed_temps) / len(trimmed_temps)
 
-        # Only process VR temps if we have valid readings
+        # VR temps optional
         average_vr_temp = None
         if vr_temps:
             sorted_vr_temps = sorted(vr_temps)
-            trimmed_vr_temps = sorted_vr_temps[6:]  # Remove first 6 elements only
+            trimmed_vr_temps = sorted_vr_temps[6:] if len(sorted_vr_temps) > 6 else sorted_vr_temps
             average_vr_temp = sum(trimmed_vr_temps) / len(trimmed_vr_temps)
 
         average_power = sum(power_consumptions) / len(power_consumptions)
 
-        # Add protection against zero hashrate
         if average_hashrate > 0:
             efficiency_jth = average_power / (average_hashrate / 1_000)
         else:
             print(RED + "Warning: Zero hashrate detected, skipping efficiency calculation" + RESET)
             return None, None, None, False, None, "ZERO_HASHRATE"
 
-        # Calculate if hashrate is within 10% of expected
         hashrate_within_tolerance = (average_hashrate >= expected_hashrate * 0.90)
 
         print(GREEN + f"Average Hashrate: {average_hashrate:.2f} GH/s (Expected: {expected_hashrate:.2f} GH/s)" + RESET)
@@ -401,19 +414,19 @@ def benchmark_iteration(core_voltage, frequency):
 #                  RESULT HANDLING
 # =============================================================
 def save_results():
+    """Persist current results list to IP-specific JSON file."""
     try:
-        # Extract IP from nerdqaxe_ip global variable and remove 'http://'
-        ip_address = nerdqaxe_ip.replace('http://', '')
-        filename = f"nerdqaxe_benchmark_results_{ip_address}.json"
+        ip_clean = nerdqaxe_ip.replace('http://', '')
+        filename = f"nerdqaxe_benchmark_results_{ip_clean}.json"
         with open(filename, "w") as f:
             json.dump(results, f, indent=4)
         print(GREEN + f"Results saved to {filename}" + RESET)
-        print()  # Add empty line
-
+        print()
     except IOError as e:
         print(RED + f"Error saving results to file: {e}" + RESET)
 
 def reset_to_best_setting():
+    """Apply best hashrate settings if available; otherwise apply device defaults."""
     if not results:
         print(YELLOW + "No valid benchmarking results found. Applying predefined default settings." + RESET)
         set_system_settings(default_voltage, default_frequency)
@@ -455,26 +468,36 @@ try:
     print("\nNOTE: Ambient temperature significantly affects these results. The optimal settings found may not")
     print("work well if room temperature changes substantially. Re-run the benchmark if conditions change.\n")
 
-    current_voltage = initial_voltage
-    current_frequency = initial_frequency
+    # ---------- Full-grid approach (no extra flags required) ----------
+    # Build the full V/F grid within allowed bounds using configured steps
+    grid = [
+        (v, f)
+        for v in range(min_allowed_voltage, max_allowed_voltage + 1, voltage_step)
+        for f in range(min_allowed_frequency, max_allowed_frequency + 1, frequency_step)
+    ]
 
-    while current_voltage <= max_allowed_voltage and current_frequency <= max_allowed_frequency:
+    # Optional: start from user-provided initial pair by ordering the grid
+    # Place the initial pair and its forward region first for faster feedback
+    def sort_key(pair):
+        v, f = pair
+        bias = 0
+        if v >= initial_voltage and f >= initial_frequency:
+            bias = -1  # test forward quadrant earlier
+        return (bias, abs(v - initial_voltage) + abs(f - initial_frequency))
+    grid.sort(key=sort_key)
+
+    print(GREEN + f"Total combos to test: {len(grid)}" + RESET)
+
+    remaining = sum(1 for p in grid if p not in tested_combinations)
+    if tested_combinations:
+        print(YELLOW + f"Already tested combos: {len(tested_combinations)} | Remaining: {remaining}" + RESET)
+
+    for (current_voltage, current_frequency) in grid:
         if (current_voltage, current_frequency) in tested_combinations:
-            print(YELLOW + f"[SKIP] Already tested: {current_voltage:4d} mV @ {current_frequency:4d} MHz" + RESET)
+            print(YELLOW + f"[SKIP] Already tested: {current_voltage} mV @ {current_frequency} MHz" + RESET)
+            continue
 
-            if current_frequency + frequency_increment <= max_allowed_frequency:
-                current_frequency += frequency_increment
-            elif current_voltage + voltage_increment <= max_allowed_voltage:
-                current_voltage += voltage_increment
-                current_frequency = min_allowed_frequency
-            else:
-                print(GREEN + "✔ Benchmark complete. No remaining combinations." + RESET)
-                break
-
-            continue  #
-
-        print(GREEN + f"[RUN] Testing: {current_voltage:4d} mV @ {current_frequency:4d} MHz" + RESET)
-
+        print(GREEN + f"[RUN] Testing: {current_voltage} mV @ {current_frequency} MHz" + RESET)
         set_system_settings(current_voltage, current_frequency)
         avg_hashrate, avg_temp, efficiency_jth, hashrate_within_tolerance, avg_vr_temp, error_reason = benchmark_iteration(current_voltage, current_frequency)
 
@@ -486,28 +509,18 @@ try:
                 "averageTemperature": avg_temp,
                 "efficiencyJTH": efficiency_jth
             }
-
             if avg_vr_temp is not None:
                 result["averageVRTemp"] = avg_vr_temp
 
             results.append(result)
-
-            if hashrate_within_tolerance:
-                if current_frequency + frequency_increment <= max_allowed_frequency:
-                    current_frequency += frequency_increment
-                else:
-                    break
-            else:
-                if current_voltage + voltage_increment <= max_allowed_voltage:
-                    current_voltage += voltage_increment
-                    current_frequency = max(current_frequency - frequency_increment, min_allowed_frequency)
-                    print(YELLOW + f"# Hashrate too low. Retry with higher voltage {current_voltage}mV and same frequency." + RESET)
-                else:
-                    break
+            tested_combinations.add((current_voltage, current_frequency))
+            save_results()
         else:
-            print(GREEN + "Reached thermal or stability limits. Stopping further testing." + RESET)
-            break
+            print(YELLOW + f"Skipping {current_voltage} mV @ {current_frequency} MHz due to {error_reason or 'instability'}" + RESET)
+            # Do not add to tested_combinations to allow retry in future runs if needed
+            continue
 
+    # Finished grid
     save_results()
 
 except Exception as e:
@@ -571,8 +584,8 @@ finally:
         }
 
         # Save the final data to JSON
-        ip_address = nerdqaxe_ip.replace('http://', '')
-        filename = f"nerdqaxe_benchmark_results_{ip_address}.json"
+        ip_clean = nerdqaxe_ip.replace('http://', '')
+        filename = f"nerdqaxe_benchmark_results_{ip_clean}.json"
         with open(filename, "w") as f:
             json.dump(final_data, f, indent=4)
 
@@ -606,6 +619,7 @@ finally:
 #                  CLEANUP
 # =============================================================
 def cleanup_and_exit(reason=None):
+    """Finalizer used by signal/exception paths to persist and apply best settings."""
     global system_reset_done
     if system_reset_done:
         return
