@@ -90,7 +90,7 @@ python nerdqaxe_benchmark.py  192.168.2.26 -v 1175 -f 775
 |----------------------------|-----------------|
 | Max chip temp              | 66 °C           |
 | Max VR temp                | 86 °C           |
-| Max power draw             | 40 W            |
+| Max power draw             | 100 W            |
 | Min voltage                | 1120 mV         |
 | Max voltage                | 1200 mV         |
 | Min frequency              | 500 MHz         |
